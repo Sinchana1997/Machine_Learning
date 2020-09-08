@@ -8,11 +8,16 @@ from imutils import paths
 import numpy as np
 import argparse
 import cv2
-from sklearn.neighbors import KNeighborsClassifier
+
+from sklearn.ensemble import RandomForestClassifier
+
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 import pickle as cPickle
+
+
+
 
 import matplotlib.pyplot as plt
 
@@ -20,6 +25,7 @@ import matplotlib.pyplot as plt
 ap = argparse.ArgumentParser()
 ap.add_argument("-t", "--training", required=True, help="path to the dataset for training images")
 ap.add_argument("-e", "--testing", required=True, help="path to the testing images")
+
 args = vars(ap.parse_args())
 
 # initialize the local binary patterns descriptor and initialize the index dictionary
@@ -41,13 +47,13 @@ for imagePath in paths.list_images(args["training"]):
 	# label and data lists
 	labels.append(imagePath.split("\\")[-2])
 	data.append(hist)
+(trainData, testData, trainLabels, testLabels) = train_test_split(np.array(data), np.array(labels), train_size = 0.5, test_size=0.25, random_state=42)
 
-(trainData, testData, trainLabels, testLabels) = train_test_split(np.array(data),
-	np.array(labels), test_size=0.25, random_state=42)
 
-# train a KNN on the data
-model = KNeighborsClassifier(n_neighbors=1)
-print("[INFO] evaluating k-NN classifier...")
+print("[INFO] evaluating RFC classifier...")
+model = RandomForestClassifier()
+
+
 model.fit(trainData, trainLabels)
 print("[INFO] evaluating...")
 predictions = model.predict(testData)
